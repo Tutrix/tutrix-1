@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Screen</title>
+  <style>
+    /* Style code */
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; background-color: #E6E6FA; padding: 10px; }
+    h1 { flex: 1; text-align: center; font-size: 24px; margin: 0; }
+    .button-icon { background: none; border: none; font-size: 20px; cursor: pointer; }
+    .search-bar, .recent-search, .location, .location-search-bar { margin: 20px 0; }
+    .search-input, .location-input { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #DDD; }
+    .recent-search button, .location-item, .suggestion-item {
+      display: block; width: 100%; padding: 10px; text-align: left; border: none; background: #f9f9f9; border-bottom: 1px solid #DDD; cursor: pointer;
+    }
+    .locate-button { display: block; width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; text-align: center; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <button class="button-icon" onclick="alert('Menu clicked')">☰</button>
+    <h1>TUTRIX</h1>
+    <button class="button-icon" onclick="alert('Account clicked')">👤</button>
+  </header>
+
+  <!-- Search Bar for Subject -->
+  <div class="search-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="What subject do you need help in?" />
+  </div>
+
+  <!-- Recent Searches -->
+  <div class="recent-search">
+    <h2>Recent Searches</h2>
+    <button onclick="setSearchText('MATH-UA.0121 - Calculus I')">MATH-UA.0121 - Calculus I</button>
+    <button onclick="setSearchText('ACCT-UB.0001 - Principles of Financial Accounting')">ACCT-UB.0001 - Principles of Financial Accounting</button>
+    <button onclick="setSearchText('CHEM-UA.0125 - General Chemistry I')">CHEM-UA.0125 - General Chemistry I</button>
+  </div>
+
+  <!-- Locate Button -->
+  <button class="locate-button" onclick="handleLocate()">Locate</button>
+
+  <!-- Location Search Bar -->
+  <div class="location-search-bar">
+    <input type="text" class="location-input" id="locationInput" placeholder="Where would you like to be tutored?" oninput="fetchSuggestions(this.value)" />
+    <div id="suggestionsContainer"></div>
+  </div>
+
+  <!-- Locations -->
+  <div class="location">
+    <h2>Locations</h2>
+    <div class="location-item">
+      <p class="location-name">La Colombe</p>
+      <p class="location-address">400 Lafayette St, New York, NY</p>
+    </div>
+    <div class="location-item">
+      <p class="location-name">Elmer Holmes Bobst Library</p>
+      <p class="location-address">70 Washington Square S, New York, NY</p>
+    </div>
+    <div class="location-item">
+      <p class="location-name">Kimmel Center</p>
+      <p class="location-address">60 Washington Square S, New York, NY</p>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    function setSearchText(text) {
+      document.getElementById('searchInput').value = text;
+    }
+
+    function handleLocate() {
+      const location = document.getElementById('locationInput').value;
+      if (location) {
+        window.open(`https://www.openstreetmap.org/search?query=${encodeURIComponent(location)}`, '_blank');
+      } else {
+        alert("Please enter a location.");
+      }
+    }
+
+    function fetchSuggestions(query) {
+      if (!query) {
+        document.getElementById('suggestionsContainer').innerHTML = '';
+        return;
+      }
+      // Fetch suggestions from Nominatim API
+      fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=5`)
+        .then(response => response.json())
+        .then(data => {
+          const suggestionsContainer = document.getElementById('suggestionsContainer');
+          suggestionsContainer.innerHTML = '';
+          data.forEach(suggestion => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item';
+            suggestionItem.innerText = suggestion.display_name;
+            suggestionItem.onclick = () => {
+              document.getElementById('locationInput').value = suggestion.display_name;
+              suggestionsContainer.innerHTML = '';
+            };
+            suggestionsContainer.appendChild(suggestionItem);
+          });
+        })
+        .catch(error => console.error('Error fetching suggestions:', error));
+    }
+  </script>
+
+</body>
+</html>
